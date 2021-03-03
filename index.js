@@ -142,10 +142,9 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
 	};
 	
 	Exporter.getTopics = function(callback) {
-		return Exporter.getPaginatedTopics(0, -1, callback);
+		return Exporter.getPaginatedTopicss(0, -1, callback);
 	};
-	var thing = 0;
-	Exporter.getPaginatedTopics = function(start, limit, callback) {
+	Exporter.getPaginatedTopicss = function(start, limit, callback) {
 		
         callback = !_.isFunction(callback) ? noop : callback;
 
@@ -206,8 +205,6 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
                     map[row._tid] = row;
                 });
                 callback(null, map);
-				thing++
-				console.log(`${thing} / ${Object.keys(map).length}`)
             });
 	};
 	var getTopicsMainPids = function(callback) {
