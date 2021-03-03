@@ -211,7 +211,7 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
 		if (Exporter._topicsMainPids) {
 			return callback(null, Exporter._topicsMainPids);
 		}
-		Exporter.getPaginatedTopics(0, -1, function(err, topicsMap) {
+		Exporter.getPaginatedTopicss(0, -1, function(err, topicsMap) {
 			if (err) return callback(err);
 			
 			Exporter._topicsMainPids = {};
@@ -231,24 +231,7 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
 		var err;
 		var prefix = Exporter.config('prefix');
 		var startms = +new Date();
-		var query =
-			'SELECT ' + prefix + 'posts.post_id as _pid, '
-			//+ 'POST_PARENT_ID as _post_replying_to, ' phpbb doesn't have "reply to another post"
-			+ prefix + 'posts.topic_id as _tid, '
-			+ prefix + 'posts.post_time as _timestamp, '
-			// not being used
-			+ prefix + 'posts.post_subject as _subject, '
-			
-			+ prefix + 'posts_text.post_text as _content, '
-			+ prefix + 'posts.poster_id as _uid '
-			
-			
-			
-			+ 'FROM ' + prefix + 'posts, ' + prefix + 'posts_text'
-			
-			// the ones that are topics main posts are filtered below
-			+ ' WHERE ' + prefix + 'posts.topic_id > 0 '
-			+ (start >= 0 && limit >= 0 ? 'LIMIT ' + start + ',' + limit : '');
+		var query = `SELECT * FROM (SELECT ${prefix}posts.post_id as _pid, ${prefix}posts.topic_id as _tid, ${prefix}posts.post_time as _timestamp, ${prefix}posts.poster_id as _uid FROM ${prefix}posts) as a JOIN (SELECT ${prefix}posts_text.post_text as _content, ${prefix}posts_text.post_id as piddy FROM ${prefix}posts_text) as b ON b.piddy = a._pid`;
 		
 		if (!Exporter.connection) {
 			err = {error: 'MySQL connection is not setup. Run setup(config) first'};

@@ -18,4 +18,4 @@ node_modules
 sftp-config.json
 tmp.json
 msg.js
-query.txt
+*.txt
