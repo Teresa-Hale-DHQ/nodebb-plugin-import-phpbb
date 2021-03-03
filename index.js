@@ -98,6 +98,46 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
 			});
 	};
 	
+	Exporter.getMessages = function(callback) {
+	return Exporter.getPaginatedMessages_(0, -1, callback);
+}
+Exporter.getPaginatedMessages_ = function(start, limit, callback) {
+        callback = !_.isFunction(callback) ? noop : callback;
+
+        var err;
+        var prefix = Exporter.config('prefix');
+        var startms = +new Date();
+        var query = `SELECT * FROM (SELECT ${prefix}privmsgs.privmsgs_id as _mid, ${prefix}privmsgs.from_user_id as _fromuid, ${prefix}privmsgs.privmsgs_date as _timestamp, ${prefix}privmsgs.privmsgs_to_userid as _touid, FROM ${prefix}privmsgs) as a JOIN ${prefix}privmsgs_text ON a._mid = ${prefix}privmsgs_text.privmsgs_text_id`;
+
+        if (!Exporter.connection) {
+            err = {error: 'MySQL connection is not setup. Run setup(config) first'};
+            Exporter.error(err.error);
+            return callback(err);
+        }
+
+		Exporter.connection.query(query,
+			function (err, rows) {
+				if (err) {
+					Exporter.error(err);
+					return callback(err);
+				}
+				getTopicsMainPids(function(err, mpids) {
+					//normalize here
+					var map = {};
+					rows.forEach(function (row) {
+						if (! mpids[row._pid]) {
+							row._content = row._content || '';
+							row._timestamp = ((row._timestamp || 0) * 1000) || startms;
+							map[row._mid] = row;
+						}
+					});
+
+					callback(null, map);
+				});
+			});
+
+    };
+	
 	Exporter.getCategories = function(callback) {
 		return Exporter.getPaginatedCategories(0, -1, callback);
 	};
@@ -223,9 +263,9 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
 		});
 	};
 	Exporter.getPosts = function(callback) {
-		return Exporter.getPaginatedPosts(0, -1, callback);
+		return Exporter._getPaginatedPosts(0, -1, callback);
 	};
-	Exporter.getPaginatedPosts = function(start, limit, callback) {
+	Exporter._getPaginatedPosts = function(start, limit, callback) {
 		callback = !_.isFunction(callback) ? noop : callback;
 		
 		var err;
@@ -309,7 +349,7 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
 				Exporter.getPaginatedTopics(0, 1000, next);
 			},
 			function(next) {
-				Exporter.getPaginatedPosts(1001, 2000, next);
+				Exporter._getPaginatedPosts(1001, 2000, next);
 			},
 			function(next) {
 				Exporter.teardown(next);
