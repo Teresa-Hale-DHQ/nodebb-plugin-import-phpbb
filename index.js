@@ -8,26 +8,26 @@ var logPrefix = '[nodebb-plugin-import-phpbb]';
 (function(Exporter) {
 	
 	Exporter.setup = function(config, callback) {
-		Exporter.log('setup');
-		
-		// mysql db only config
-		// extract them from the configs passed by the nodebb-plugin-import adapter
-		var _config = {
-			host: config.dbhost || config.host || 'localhost',
-			user: config.dbuser || config.user || 'root',
-			password: config.dbpass || config.pass || config.password || '',
-			port: config.dbport || config.port || 3306,
-			database: config.dbname || config.name || config.database || 'phpbb'
-		};
-		
-		Exporter.config(_config);
-		Exporter.config('prefix', config.prefix || config.tablePrefix || '' /* phpbb_ ? */ );
-		
-		Exporter.connection = mysql.createConnection(_config);
-		Exporter.connection.connect();
-		
-		callback(null, Exporter.config());
-	};
+        Exporter.log('setup');
+
+        // mysql db only config
+        // extract them from the configs passed by the nodebb-plugin-import adapter
+        var _config = {
+            host: config.dbhost || config.host || 'localhost',
+            user: config.dbuser || config.user || 'root',
+            password: config.dbpass || config.pass || config.password || '',
+            port: config.dbport || config.port || 3306,
+            database: config.dbname || config.name || config.database || 'phpbb'
+        };
+
+        Exporter.config(_config);
+        Exporter.config('prefix', config.prefix || config.tablePrefix || '' /* phpbb_ ? */ );
+
+        Exporter.connection = mysql.createConnection(_config);
+        Exporter.connection.connect();
+
+        callback(null, Exporter.config());
+    };
 	
 	Exporter.getUsers = function(callback) {
 		return Exporter.getPaginatedUsers(0, -1, callback);

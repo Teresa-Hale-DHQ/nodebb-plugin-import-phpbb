@@ -1,6 +1,6 @@
 {
   "name": "@teresa-hale/nodebb-plugin-import-phpbb",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A phpBB2 to NodeBB data exporter",
   "main": "./index.js",
   "scripts": {
